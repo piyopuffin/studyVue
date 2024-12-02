@@ -14,7 +14,7 @@ https://swallow-incubate.com/archives/blog/20190422/
 
 ::right::
 
-<img src="/assets/images/lifecycle.png" class="ml-10 w-70 h-auto" />
+<img src="https://ja.vuejs.org/assets/lifecycle.MuZLBFAS.png" class="ml-10 w-70 h-auto" />
 
 ---
 level: 3
