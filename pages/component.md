@@ -82,10 +82,11 @@ hideInToc: true
 <div class="flex">
   <div class="bg-slate-100 pa-4 mr-4">
   <h3><logos-vue /> 呼び出す側（子）の書き方</h3>
+
 ```vue
-<script>
+<script setup>
 export default {
-props: ['title','content']//親から渡されたpropsで使うものを宣言
+  props: ['title','content']//親から渡されたpropsで使うものを宣言
 }
 </script>
 

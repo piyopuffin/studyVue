@@ -7,24 +7,30 @@ Vue.jsにおいて全ての基本になるのは、下のような単純な構�
 
 ```vue
 <div id="counter">
-  Counter: {{ counter }}
+  <p>Counter: {{ counter }}</p>
+  <button @click="countup">up</button>
 </div>
 ```
 ```js
+const { createApp, ref } = Vue
 const Counter = {
-  data() {
+  setup() {
+    const counter = ref(0)
+    const countup = ()=>{
+      counter.value++ // setup内のプロパティはProxyオブジェクトなので、値には.valueをつけてアクセスする。
+    }
     return {
-      counter: 0 //counterというプロパティを宣言する
+      counter,
+      countup
     }
   }
 }
-
-// createApp()でVueインスタンスが生成され、.mount()で#counterにマウントされる。
-// これによってDOMとVueインスタンス上のデータが相互にバインドできるようになる。
+// createApp()で生成されたVueインスタンスは.mount()で#counterにマウントされ、DOMとVueインスタンス上のデータが相互にバインドされる。
 Vue.createApp(Counter).mount('#counter')
 ```
 
 Vueインスタンス上のプロパティとDOM上にレンダリングされる内容はお互いをバインド（束縛）しています。
+
 
 ---
 level: 3
@@ -116,10 +122,12 @@ hideInToc: true
 
 ## インラインスタイルのバインディング
 ```js
-data() {
+setup(){
+  const activeColor = ref('red')
+  const fontSize = ref(30)
   return {
-    activeColor: 'red',
-    fontSize: 30
+    activeColor,
+    fontSize
   }
 }
 ```
@@ -147,17 +155,24 @@ hideInToc: true
 ```
 このように算出プロパティに置き換えることができる。
 ```js
-  import { ref, computed } from 'vue'
-  const author = { books:[] }
-  const publishedBooksMessage = computed(()=>{
-    return author.value.books.length > 0 ? 'Yes' : 'No'
-  })
+  const { createApp, computed } = Vue
+  Vue.createApp({
+    setup(){
+      const author = { books:[] }
+      const publishedBooksMessage = computed(()=>{
+        return author.value.books.length > 0 ? 'Yes' : 'No'
+      })
+      return{
+        author,
+        publishedBooksMessage
+      }
+    }
+  }).mount('#books')
 ```
 ```html
-<template>
-  <p>Has published books:</p>
-  <span>{{ publishedBooksMessage }}</span>
-</template>
+  <div id="books">
+    <p>Has published books: {{ publishedBooksMessage }}</p>
+  </div>
 ```
 
 
@@ -171,8 +186,16 @@ hideInToc: true
 - v-elseを付加したhtml要素は、直前のv-ifまたはv-else-ifが`false`の時だけ描画される
 
 ```js
-import {ref} from 'vue'
-const input = ref(null)
+const { ref } = Vue
+
+Vue.createApp({
+  setup(){
+    const input = ref(null)
+    return{
+      input
+    }
+  }
+})
 ```
 
 ```html
@@ -314,6 +337,35 @@ export default {
 }
 ```
 
+```js
+const { ref, watch, createApp } = Vue
+
+const qa = {
+  setup(){
+    const question = ref('')
+    const answer = ref('?を付けて質問してね')
+    const loading = ref(false)
+
+    watch(question, async(newQuestion, OldQuestion)=>{
+      if (newQuestion.includes('?')) {
+        loading.value = true
+        answer.value = '考え中...'
+        try {
+          const res = await fetch('https://yesno.wtf/api')
+          answer.value = (await res.json()).answer
+        } catch (error) {
+          answer.value = 'エラー： APIにアクセスできません。 ' + error
+        } finally {
+          loading.value = false
+        }
+      }
+    })
+  }
+}
+
+Vue.createApp(qa).mount('#qa')
+```
+
 <style>
 .slidev-code{
   font-size: 10px !important;
@@ -329,19 +381,33 @@ hideInToc: true
 DOM要素を直接指定する
 
 JS側から特定のDOM要素を直接指定して制御したい場合、ref属性を使用することができる。
-HTML側でref属性で名前を定義しておき、JS側から`this.$refs.名前`でアクセスできる。
+HTML側でref属性を定義しておき、JS側からは`useTemplateRef()`ヘルパーでアクセスできる。
 
 DOM側
 ```html
-<input ref="input">
+<div id="form">
+  <input ref="my-input">
+</div>
 ```
 
 JS側
 ```js
-this.$refs.input.focus();
+const { useTemplateRef, onMounted, createApp } = Vue
+
+const focusinput = {
+  setup(){
+    //useTemplateRef()の第一引数はrefの値と一致させる
+    const input = useTemplateRef('my-input')
+    onMounted(() => {
+      input.value.focus()
+    })
+  }
+}
+Vue.createApp(focusinput).mount('#form')
 ```
 
-上の例では、 `ref=”input”`の要素にフォーカスを移している。
+上の例では、 `ref=”my-input”`の要素にフォーカスを移している。
 
 注意：<br>
-DOM要素へのアクセスはレンダリングが終わってからでないとできない。refを使ってDOMにアクセスする場合は、実行時のライフサイクルがmounted以降である必要があることに注意しよう。
+DOM要素へのアクセスはレンダリングが終わってからでないとできないため、`input.value.focus()`は`onMounted()`フックで実行している。
+refを使ってDOMにアクセスする場合は、実行時のライフサイクルがmounted以降である必要があることに注意しよう。

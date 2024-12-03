@@ -45,16 +45,17 @@ level: 4
 - VueからcreateAppをインポートする
 - createAppメソッドを使って、新しいVueインスタンスを作成する。
   - #appをマウント先として指定する。
-- dataを定義する
+- setupメソッドの中でリアクティブなプロパティ等を宣言する
+- テンプレート側で使用したいプロパティやイベントリスナー等はreturnする
 
 ```js{1|3|10|4,5,6,7,8,9}
-const { createApp } = Vue
+const { createApp, ref } = Vue
 
-createApp({
-  data() {
+Vue.createApp({
+  setup() {
+    const message = ref("Hello Vue.js!")
     return {
-      message:"Hello World!",
-      button:"<button>これはボタンです</button>",
+      message
     }
   }
 }).mount('#app')
