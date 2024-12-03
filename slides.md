@@ -1,10 +1,10 @@
 ---
-theme: Default
+theme: seriph
 class: text-center
 highlighter: shiki
 lineNumbers: false
 info: |
-  ## Vue.js道場
+  ## study JavaScript, Vue.js
 
 drawings:
   persist: false
