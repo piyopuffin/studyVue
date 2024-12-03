@@ -27,6 +27,9 @@ jobs:
 
       - name: Setup @antfu/ni
         run: npm i -g @antfu/ni
+      - name: Install Slidev Theme
+        run: npm i @slidev/theme-default
+        run: npm i @slidev/theme-seriph
 
       - name: Install dependencies
         run: nci
